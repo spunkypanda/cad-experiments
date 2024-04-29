@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cad-stuff"
+name = "cad-experiments"
 version = "0.1.0"
 description = ""
 authors = ["Chinmay Bag <chinmay@praemineo.com>"]
