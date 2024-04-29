@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "cad-stuff"
+version = "0.1.0"
+description = ""
+authors = ["Chinmay Bag <chinmay@praemineo.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+tqdm = "^4.66.2"
+ezdxf = {extras = ["draw"], version = "^1.2.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
