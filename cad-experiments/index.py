@@ -1,5 +1,8 @@
 """Entry point"""
 
+import streamlit as st
+from streamlit_drawable_canvas import st_canvas
+
 from dxf_parser import DxfParser
 
 if __name__ == '__main__':

@@ -6,9 +6,11 @@ authors = ["Chinmay Bag <chinmay@praemineo.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = "~3.12.3"
 tqdm = "^4.66.2"
 ezdxf = {extras = ["draw"], version = "^1.2.0"}
+jupyterlab = "^4.1.8"
+streamlit-drawable-canvas = "^0.9.3"
 
 
 [build-system]

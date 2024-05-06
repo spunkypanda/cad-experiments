@@ -3,6 +3,56 @@
 import ezdxf
 from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout
 from ezdxf.addons.drawing import pymupdf, config
+from ezdxf.math import Vec3
+from ezdxf import bbox
+
+def get_arbitrary_orthogonal_vectors(entity):
+    Az = Vec3(entity.dxf.extrusion).normalize()  # normal (extrusion) vector
+    if (abs(Az.x) < 1/64.) and (abs(Az.y) < 1/64.):
+        Ax = Vec3(0, 1, 0).cross(Az).normalize()  # the cross-product operator
+    else:
+        Ax = Vec3(0, 0, 1).cross(Az).normalize()  # the cross-product operator
+    Ay = Az.cross(Ax).normalize()
+    return (Ax, Ay, Az)
+
+
+def wcs_to_ocs(axes, point):
+    Ax, Ay, Az = axes
+    px, py, pz = Vec3(point)  # point in WCS
+    x = px * Ax.x + py * Ax.y + pz * Ax.z
+    y = px * Ay.x + py * Ay.y + pz * Ay.z
+    z = px * Az.x + py * Az.y + pz * Az.z
+    return Vec3(x, y, z)
+
+
+# Wx = wcs_to_ocs((1, 0, 0))
+# Wy = wcs_to_ocs((0, 1, 0))
+# Wz = wcs_to_ocs((0, 0, 1))
+
+
+def ocs_to_wcs(axes, point):
+    (Wx, Wy, Wz) = axes
+    px, py, pz = Vec3(point)  # point in OCS
+    x = px * Wx.x + py * Wx.y + pz * Wx.z
+    y = px * Wy.x + py * Wy.y + pz * Wy.z
+    z = px * Wz.x + py * Wz.y + pz * Wz.z
+    return Vec3(x, y, z)
+
+
+def convert_to_wcs(entity):
+    # if entity.dxf.hasattr('extrusion'):
+    #     return wcs_to_ocs(entity.dxf.insert)
+    # else:
+    #     return entity.dxf.insert
+
+    Ax, Ay, Az = get_arbitrary_orthogonal_vectors(entity)
+    axes = Ax, Ay, Az
+
+    Wx = wcs_to_ocs(axes, (1, 0, 0))
+    Wy = wcs_to_ocs(axes, (0, 1, 0))
+    Wz = wcs_to_ocs(axes, (0, 0, 1))
+
+    return ocs_to_wcs((Wx, Wy, Wz), entity.dxf.insert)
 
 
 class DxfParser:
@@ -29,11 +79,17 @@ class DxfParser:
 
         #self.paperspace_attribs = self.msp.entitydb.get('PAPERSPACE').attribs
         self.coords = [block.dxfattribs().get('insert') for block in self.blockrefs]
+        self.blockrefsattribs = [block.dxfattribs() for block in self.blockrefs]
+
+        boxed = bbox.extents(self.blockrefs)
+
+        self.bbb = [convert_to_wcs(block) for block in self.msp.query('INSERT[name=="TWOBYFOUR"]')]
 
         """
-        blockrefs = [block.dxfattribs() for block in self.blockrefs]
         self.coords = [blockref.get('insert') for blockref in tqdm(blockrefs)]
         """
+
+        self.ccc = [b for b in self.bbb]
 
         return self.coords
 
